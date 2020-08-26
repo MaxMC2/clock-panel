@@ -17,6 +17,7 @@ export const optionsBuilder = (builder: PanelOptionsEditorBuilder<ClockOptions>)
         options: [
           { value: ClockMode.time, label: 'Time' },
           { value: ClockMode.countdown, label: 'Countdown' },
+          { value: ClockMode.loop, label: 'Loop' },
         ],
       },
       defaultValue: ClockMode.time,
@@ -64,6 +65,7 @@ export const optionsBuilder = (builder: PanelOptionsEditorBuilder<ClockOptions>)
   // TODO: refreshSettings.syncWithDashboard
 
   addCountdown(builder);
+  addLoop(builder);
   addTimeFormat(builder);
   addTimeZone(builder);
   addDateFormat(builder);
@@ -105,6 +107,41 @@ function addCountdown(builder: PanelOptionsEditorBuilder<ClockOptions>) {
       },
       defaultValue: undefined,
       showIf: o => o.mode === ClockMode.countdown,
+    });
+}
+
+//---------------------------------------------------------------------
+// LOOP
+//---------------------------------------------------------------------
+function addLoop(builder: PanelOptionsEditorBuilder<ClockOptions>) {
+  const category = ['Loop'];
+
+  builder
+    .addTextInput({
+      category,
+      path: 'loopSettings.loopCountdown',
+      name: 'Loop Countdown',
+      defaultValue: '01:00:00',
+      showIf: o => o.mode === ClockMode.loop,
+    })
+    .addTextInput({
+      category,
+      path: 'loopSettings.endLoopTime',
+      name: 'Next Time',
+      defaultValue: dateTime(Date.now())
+        .add(1,'h')
+        .format('HH:mm:ss'),
+      showIf: o => o.mode === ClockMode.loop,
+    })
+    .addTextInput({
+      category,
+      path: 'loopSettings.customFormat',
+      name: 'Custom format',
+      settings: {
+        placeholder: 'optional',
+      },
+      defaultValue: undefined,
+      showIf: o => o.mode === ClockMode.loop,
     });
 }
 

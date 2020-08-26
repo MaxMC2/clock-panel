@@ -8,11 +8,13 @@ export interface ClockOptions {
   timeSettings: TimeSettings;
   timezoneSettings: TimezoneSettings;
   refreshSettings: RefreshSettings;
+  loopSettings: LoopSettings;
 }
 
 export enum ClockMode {
   time = 'time',
   countdown = 'countdown',
+  loop = 'loop',
 }
 
 export enum ClockType {
@@ -63,4 +65,10 @@ interface TimezoneSettings {
 
 interface RefreshSettings {
   syncWithDashboard: boolean;
+}
+
+interface LoopSettings {
+  loopCountdown: string;
+  endLoopTime: any;
+  customFormat?: string;
 }

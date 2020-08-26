@@ -114,6 +114,63 @@ export class ClockPanel extends PureComponent<Props, State> {
     return formattedTimeLeft;
   }
 
+  getLoopText(): string {
+    const { now } = this.state;
+    const { loopSettings, timezone } = this.props.options;
+
+    const timeLeft = moment.duration(
+      moment(loopSettings.endLoopTime, 'HH:mm:ss')
+        .utcOffset(this.getTZ(timezone).format('Z'), true)
+        .diff(now)
+    );
+
+    let formattedTimeLeft = '';
+
+    if (timeLeft.asSeconds() <= 0) {
+      let countdownTime = moment(loopSettings.loopCountdown, 'HH:mm:ss');
+
+      loopSettings.endLoopTime = moment(loopSettings.endLoopTime, 'HH:mm:ss')
+        .add(countdownTime.get('hour'), 'h')
+        .add(countdownTime.get('minute'), 'm')
+        .add(countdownTime.get('second'), 's')
+        .format('HH:mm:ss');
+    }
+
+    if (loopSettings.customFormat === 'auto') {
+      return (timeLeft as any).format();
+    }
+
+    if (loopSettings.customFormat) {
+      return (timeLeft as any).format(loopSettings.customFormat);
+    }
+
+    let previous = '';
+
+    if (timeLeft.years() > 0) {
+      formattedTimeLeft = timeLeft.years() === 1 ? '1 year, ' : timeLeft.years() + ' years, ';
+      previous = 'years';
+    }
+    if (timeLeft.months() > 0 || previous === 'years') {
+      formattedTimeLeft += timeLeft.months() === 1 ? '1 month, ' : timeLeft.months() + ' months, ';
+      previous = 'months';
+    }
+    if (timeLeft.days() > 0 || previous === 'months') {
+      formattedTimeLeft += timeLeft.days() === 1 ? '1 day, ' : timeLeft.days() + ' days, ';
+      previous = 'days';
+    }
+    if (timeLeft.hours() > 0 || previous === 'days') {
+      formattedTimeLeft += timeLeft.hours() === 1 ? '1 hour, ' : timeLeft.hours() + ' hours, ';
+      previous = 'hours';
+    }
+
+    if (timeLeft.minutes() > 0 || previous === 'hours') {
+      formattedTimeLeft += timeLeft.minutes() === 1 ? '1 minute, ' : timeLeft.minutes() + ' minutes, ';
+    }
+
+    formattedTimeLeft += timeLeft.seconds() === 1 ? '1 second ' : timeLeft.seconds() + ' seconds';
+    return formattedTimeLeft;
+  }
+
   renderZone() {
     const { now } = this.state;
     const { timezoneSettings } = this.props.options;
@@ -182,8 +239,16 @@ export class ClockPanel extends PureComponent<Props, State> {
       font-size: ${timeSettings.fontSize};
       font-weight: ${timeSettings.fontWeight};
     `;
+    let disp = now.format(this.getTimeFormat());
+    switch (mode) {
+      case ClockMode.countdown:
+        disp = this.getCountdownText();
+        break;
+      case ClockMode.loop:
+        disp = this.getLoopText();
+        break;
+    }
 
-    const disp = mode === ClockMode.countdown ? this.getCountdownText() : now.format(this.getTimeFormat());
     return <h2 className={clazz}>{disp}</h2>;
   }
 

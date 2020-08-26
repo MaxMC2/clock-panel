@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.3] - unreleased
+
+- Added loop countdown
 
 ## [1.1.1] - unreleased
 
